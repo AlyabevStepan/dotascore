@@ -4,16 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
-	"testing"
 	"time"
-	"github.com/AlyabevStepan/dotascore/handlers"
+	"github.com/AlyabevStepan/dotascore/handler"
 
-	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/stretchr/testify/assert"
+	
 )
 
 type Server struct {
@@ -32,15 +29,7 @@ func main(){
 	if err := godotenv.Load(); err != nil {
 		fmt.Printf("error loading env :%s", err.Error())
 	}
-
-
-  r := gin.Default()
-
-  r.PUT("/put_game", handler.put_game )
-  r.PUT("/put_games", handler.put_games)
-  r.GET("/get_players",handler.get_players)
-  r.Run(":8080")
-  
+  r := handler.setupRouter()
   
   srv := new(Server)
 	if err := srv.Run(port_server, r); err != nil {
@@ -63,15 +52,4 @@ func (s *Server) Run(port string, handler http.Handler) error {
 
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
-}
-
-func TestPingRoute(t *testing.T) {
-	router := handler.setupRouter()
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/ping", nil)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "pong", w.Body.String())
 }
