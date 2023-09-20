@@ -26,7 +26,7 @@ const (
 
 
 
-func setupRouter() *gin.Engine {
+func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.PUT("/put_game", put_game )
@@ -52,6 +52,8 @@ func put_game(c *gin.Context){
 	}
 	c.JSON(http.StatusOK, gin.H{})
 }
+
+
 func put_games(c *gin.Context){
 	if err := godotenv.Load(); err != nil {
 		fmt.Printf("error loading env :%s", err.Error())
@@ -70,6 +72,8 @@ func put_games(c *gin.Context){
 	}
 	c.JSON(http.StatusOK, gin.H{})
 }
+
+
 func get_players(c *gin.Context){
 	if err := godotenv.Load(); err != nil {
 		fmt.Printf("error loading env :%s", err.Error())
@@ -89,8 +93,9 @@ func get_players(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+
 func TestPingRoute(t *testing.T) {
-	router := setupRouter()
+	router := SetupRouter()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)
