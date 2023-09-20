@@ -1,16 +1,20 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
-	"github.com/joho/godotenv"
-	"github.com/gin-gonic/gin"
-	"os"
 	"net/http"
-	"context"
+	"net/http/httptest"
+	"os"
+	"testing"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/stretchr/testify/assert"
 )
 
 type Server struct {
@@ -32,34 +36,20 @@ func main(){
 
 
   r := gin.Default()
+
+  r.PUT("/put_game", h.put_game )
+  r.PUT("/put_games", h.put_games)
+  r.GET("/get_players",h.get_players)
+  r.Run(":8080")
   
-  r.PUT("/put_game", put_game )
-  r.PUT("/put_games", put_games)
-  r.GET("/get_players",get_players)
   
-  r.Run()
   srv := new(Server)
 	if err := srv.Run(port_server, r); err != nil {
 		fmt.Printf("this is handlerbag: %s", err.Error())
 	}
+	
 }
 
-
-func put_game(c *gin.Context){
-	password := os.Getenv("DB_PASSWORD");
-	psqlconn := fmt.Sprintf("host= %s port=%s user=%s password=%s dbname=%s sslmode=disable",host,port,user,password,dbname)
-	db, err := sql.Open("postgres",psqlconn)
-	if err!=nil{
-		fmt.Println(err)	
-	}
-	defer db.Close()
-	insertDynStmt := `insert into test (name, empid) values('1', '2')`
-	_, e := db.Exec(insertDynStmt)
-	if e!=nil{
-		fmt.Println(e)
-	}
-	c.JSON(http.StatusOK, gin.H{})
-}
 
 func (s *Server) Run(port string, handler http.Handler) error {
 	s.httpServer = &http.Server{
@@ -76,43 +66,13 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return s.httpServer.Shutdown(ctx)
 }
 
+func TestPingRoute(t *testing.T) {
+	router := h.setupRouter()
 
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/ping", nil)
+	router.ServeHTTP(w, req)
 
-func put_games(c *gin.Context){
-	if err := godotenv.Load(); err != nil {
-		fmt.Printf("error loading env :%s", err.Error())
-	}
-	password := os.Getenv("DB_PASSWORD");
-	psqlconn := fmt.Sprintf("host= %s port=%s user=%s password=%s dbname=%s sslmode=disable",host,port,user,password,dbname)
-	db, err := sql.Open("postgres",psqlconn)
-	if err!=nil{
-		fmt.Println(err)	
-	}
-	defer db.Close()
-	insertDynStmt := `insert into test (name, empid) values('1', '2')`
-	_, e := db.Exec(insertDynStmt)
-	if e!=nil{
-		fmt.Println(e)
-	}
-	c.JSON(http.StatusOK, gin.H{})
-}
-
-
-func get_players(c *gin.Context){
-	if err := godotenv.Load(); err != nil {
-		fmt.Printf("error loading env :%s", err.Error())
-	}
-	password := os.Getenv("DB_PASSWORD");
-	psqlconn := fmt.Sprintf("host= %s port=%s user=%s password=%s dbname=%s sslmode=disable",host,port,user,password,dbname)
-	db, err := sql.Open("postgres",psqlconn)
-	if err!=nil{
-		fmt.Println(err)	
-	}
-	defer db.Close()
-	insertDynStmt := `insert into test (name, empid) values('1', '2')`
-	_, e := db.Exec(insertDynStmt)
-	if e!=nil{
-		fmt.Println(e)
-	}
-	c.JSON(http.StatusOK, gin.H{})
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "pong", w.Body.String())
 }
