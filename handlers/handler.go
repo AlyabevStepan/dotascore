@@ -1,4 +1,4 @@
-package h
+package handler
 
 import (
 	"os"
@@ -30,6 +30,8 @@ func setupRouter() *gin.Engine {
 	})
 	return r
 }
+
+
 func put_game(c *gin.Context){
 	password := os.Getenv("DB_PASSWORD");
 	psqlconn := fmt.Sprintf("host= %s port=%s user=%s password=%s dbname=%s sslmode=disable",host,port,user,password,dbname)

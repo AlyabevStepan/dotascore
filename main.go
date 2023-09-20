@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
+	"github.com/AlyabevStepan/dotascore/handlers"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -37,9 +36,9 @@ func main(){
 
   r := gin.Default()
 
-  r.PUT("/put_game", h.put_game )
-  r.PUT("/put_games", h.put_games)
-  r.GET("/get_players",h.get_players)
+  r.PUT("/put_game", handler.put_game )
+  r.PUT("/put_games", handler.put_games)
+  r.GET("/get_players",handler.get_players)
   r.Run(":8080")
   
   
@@ -67,7 +66,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 func TestPingRoute(t *testing.T) {
-	router := h.setupRouter()
+	router := handler.setupRouter()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)
